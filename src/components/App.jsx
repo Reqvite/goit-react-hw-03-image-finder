@@ -1,6 +1,13 @@
+import { ThemeProvider } from '@theme-ui/core';
+import { theme } from 'theme/theme';
+
+import { Container } from './Container/Container';
+
 export const App = () => {
   return (
-    <div
+    <ThemeProvider theme={theme}>
+      <Container display="flex" flexDirection="column" alignItems="center" padding="3">
+     <div
       style={{
         height: '100vh',
         display: 'flex',
@@ -12,5 +19,8 @@ export const App = () => {
     >
       React homework template
     </div>
+      </Container>
+      </ThemeProvider>
+
   );
 };
