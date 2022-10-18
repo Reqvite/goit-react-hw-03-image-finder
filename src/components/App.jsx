@@ -1,26 +1,68 @@
-import { ThemeProvider } from '@theme-ui/core';
+import { ThemeProvider } from 'styled-components';
+import { Component } from 'react';
 import { theme } from 'theme/theme';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Container } from './Container/Container';
+import { Searchbar } from './Searchbar/Searchbar';
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Button } from './Button/Button';
 
-export const App = () => {
-  return (
+import * as API from './services/api.js'
+
+
+
+export class App extends Component  {
+  state = {
+    query: '',
+    data: [],
+  }
+  
+  componentDidUpdate(_, prevState) {
+    
+  }
+
+  handleSubmit = async (values, { resetForm }) => {
+    if (this.state.query !== values.query) {
+      const resp = await API.getData(values);
+    this.setState(state => ({
+      query: values.query,
+      data: [...state.data, ...resp.data.hits]
+    }))
+  
+    resetForm()
+    } else {
+      toast('lol')
+      return;
+    }  
+  }
+
+
+  render() {
+    const { data, query } = this.state;
+    console.log(this.state);
+    
+    return (
     <ThemeProvider theme={theme}>
-      <Container display="flex" flexDirection="column" alignItems="center" padding="3">
-     <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
-      </Container>
+        <Searchbar handleSubmit={this.handleSubmit}/>
+        <Container display="flex" flexDirection="column" alignItems="center" padding="3">
+          <ImageGallery data={data} query={query}/>
+          <Button/>
+        </Container>
+         <ToastContainer
+          position="top-center"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop={false} 
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+/>
       </ThemeProvider>
-
   );
+  }
 };
