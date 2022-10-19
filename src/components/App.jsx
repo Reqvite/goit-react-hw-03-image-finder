@@ -9,7 +9,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 
-import * as API from './services/api.js'
+// import * as API from './services/api.js'
 
 
 
@@ -23,21 +23,23 @@ export class App extends Component  {
     
   }
 
-  handleSubmit = async (values, { resetForm }) => {
-    if (this.state.query !== values.query) {
-      const resp = await API.getData(values);
-    this.setState(state => ({
-      query: values.query,
-      data: [...state.data, ...resp.data.hits]
-    }))
+  // handleSubmit = async (values, { resetForm }) => {
+  //   if (this.state.query !== values.query) {
+  //     const resp = await API.getData(values);
+  //   this.setState(state => ({
+  //     query: values.query,
+  //     data: [...state.data, ...resp.data.hits]
+  //   }))
   
-    resetForm()
-    } else {
-      toast('lol')
-      return;
-    }  
-  }
-
+  //   resetForm()
+  //   } else {
+  //     toast('Enter something new')
+  //     return;
+  //   }  
+  // }
+  handleQuerySubmit = query => {
+  this.setState({query})
+}
 
   render() {
     const { data, query } = this.state;
@@ -45,7 +47,7 @@ export class App extends Component  {
     
     return (
     <ThemeProvider theme={theme}>
-        <Searchbar handleSubmit={this.handleSubmit}/>
+        <Searchbar onSubmit={this.handleQuerySubmit} />
         <Container display="flex" flexDirection="column" alignItems="center" padding="3">
           <ImageGallery data={data} query={query}/>
           <Button/>

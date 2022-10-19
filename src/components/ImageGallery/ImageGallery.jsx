@@ -7,7 +7,6 @@ export const ImageGallery = (({ data }) => {
             {data.map(({id, ...otherProps}) => 
                 <ImageGalleryItem key={id} {...otherProps} />
             )}
-            <ImageGalleryItem/>
          </ImageGalleryList>
     )
 })
