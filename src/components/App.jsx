@@ -22,20 +22,12 @@ export class App extends Component {
   }
   
   componentDidUpdate(_, prevState) {
-    const { query, page } = this.state
+    const { query, page} = this.state
     if (query !== prevState.query || page !== prevState.page) {
       this.setState({ status: 'pending' })
-       console.log(this.getData(query, page));
       this.getData(query, page)
-        .then(resp => {
-          console.log(resp);
-          // if (resp.data.hits.length === 0) {
-          //   return Promise.reject(
-          //     new Error('lol')
-          //   )
-          // }
-          this.setState({ status: 'resolved' })
-        }).catch(error => console.log(error));
+        .then(() => this.setState({ status: 'resolved' }))
+        .catch(error => console.log(error));
       }
     }   
   
@@ -50,9 +42,6 @@ export class App extends Component {
 
   getData = async (newQuery) => {
     const resp = await API.getData(newQuery, this.state.page);
-    // if (resp.data.hits.length === 0) {
-    //   return
-    // }
     this.setState(state => ({
       data: [...state.data, ...resp.data.hits],
     }))
@@ -66,14 +55,13 @@ export class App extends Component {
   
   render() {
     const { data, query,status } = this.state;
-
     return (
     <ThemeProvider theme={theme}>
         <Searchbar onSubmit={this.handleQuerySubmit} newQuery={query}/>
         <Container display="flex" flexDirection="column" alignItems="center" padding="3">
           <ImageGallery data={data} query={query} />
           {status === 'pending' && <Loader/>}
-          {status !== 'idle' && <Button loadMore={this.loadMore}/>}
+          {data.length !== 0 && <Button loadMore={this.loadMore}/>}
         </Container>
         <ToastContainer
           position="top-center"
