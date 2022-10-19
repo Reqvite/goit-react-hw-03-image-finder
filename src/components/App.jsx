@@ -1,58 +1,81 @@
 import { ThemeProvider } from 'styled-components';
 import { Component } from 'react';
 import { theme } from 'theme/theme';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Container } from './Container/Container';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
-
-// import * as API from './services/api.js'
-
+import { Loader } from './Loader/Loader';
 
 
-export class App extends Component  {
+import * as API from './services/api.js'
+
+export class App extends Component {
   state = {
+    page: 1,
     query: '',
     data: [],
+    status: 'idle',
   }
   
   componentDidUpdate(_, prevState) {
-    
+    const { query, page } = this.state
+    if (query !== prevState.query || page !== prevState.page) {
+      this.setState({ status: 'pending' })
+       console.log(this.getData(query, page));
+      this.getData(query, page)
+        .then(resp => {
+          console.log(resp);
+          // if (resp.data.hits.length === 0) {
+          //   return Promise.reject(
+          //     new Error('lol')
+          //   )
+          // }
+          this.setState({ status: 'resolved' })
+        }).catch(error => console.log(error));
+      }
+    }   
+  
+
+  handleQuerySubmit = query => {
+      this.setState({
+        page: 1,
+        query,
+        data: []
+      }) 
   }
 
-  // handleSubmit = async (values, { resetForm }) => {
-  //   if (this.state.query !== values.query) {
-  //     const resp = await API.getData(values);
-  //   this.setState(state => ({
-  //     query: values.query,
-  //     data: [...state.data, ...resp.data.hits]
-  //   }))
-  
-  //   resetForm()
-  //   } else {
-  //     toast('Enter something new')
-  //     return;
-  //   }  
-  // }
-  handleQuerySubmit = query => {
-  this.setState({query})
-}
+  getData = async (newQuery) => {
+    const resp = await API.getData(newQuery, this.state.page);
+    // if (resp.data.hits.length === 0) {
+    //   return
+    // }
+    this.setState(state => ({
+      data: [...state.data, ...resp.data.hits],
+    }))
+  } 
 
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1
+    }))
+  }
+  
   render() {
-    const { data, query } = this.state;
-    console.log(this.state);
-    
+    const { data, query,status } = this.state;
+
     return (
     <ThemeProvider theme={theme}>
-        <Searchbar onSubmit={this.handleQuerySubmit} />
+        <Searchbar onSubmit={this.handleQuerySubmit} newQuery={query}/>
         <Container display="flex" flexDirection="column" alignItems="center" padding="3">
-          <ImageGallery data={data} query={query}/>
-          <Button/>
+          <ImageGallery data={data} query={query} />
+          {status === 'pending' && <Loader/>}
+          {status !== 'idle' && <Button loadMore={this.loadMore}/>}
         </Container>
-         <ToastContainer
+        <ToastContainer
           position="top-center"
           autoClose={1000}
           hideProgressBar={false}
@@ -62,8 +85,7 @@ export class App extends Component  {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
-/>
+          theme="light"/>
       </ThemeProvider>
   );
   }

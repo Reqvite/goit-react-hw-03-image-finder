@@ -1,6 +1,6 @@
 import { Header, FormContainer, SearchButton, Input } from "./Searchbar.styled"
 
-import { Formik } from "formik"
+import {  toast } from 'react-toastify';
 import { Component } from "react"
 
 
@@ -11,21 +11,29 @@ export class Searchbar extends Component{
 
   handleNameChange = e => {
     this.setState({ query: e.currentTarget.value.toLowerCase() })
-    console.log(e.target.value);
+
   }
   
-
-    handleSubmit = (values, { resetForm }) => {
-      this.props.onSubmit(this.state.query)
-      this.setState({ query: ''})
+  handleSubmit = e => {
+    e.preventDefault();
+    const { query } = this.state;
+     if (query.trim() === '') {
+       toast('Enter something..');
+       return;
+    }
+    if (query.trim() === this.props.newQuery) {
+      toast('Enter something new..');
+       return;
+    }
+    this.props.onSubmit(query);
+    this.setState({ query: '' });
+    e.currentTarget.reset();
   }
 
   render() {
- const { query} = this.state.query
       return (
     <Header >
- <Formik initialValues={{query}} onSubmit={this.handleSubmit}>
-    <FormContainer >     
+    <FormContainer onSubmit={this.handleSubmit}>     
     <SearchButton type="submit" >
       Search
     </SearchButton>
@@ -38,7 +46,6 @@ export class Searchbar extends Component{
       onChange={this.handleNameChange}         
         />
     </FormContainer>  
-  </Formik>
 </Header>
     )
   }
