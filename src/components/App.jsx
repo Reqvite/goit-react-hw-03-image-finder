@@ -22,6 +22,7 @@ export class App extends Component {
     status: 'idle',
     showModal: false,
     photoIdx: null,
+    error: null
   }
   
   componentDidUpdate(_, prevState) {
@@ -44,7 +45,7 @@ export class App extends Component {
     try {
       const resp = await API.getData(newQuery, this.state.page);
       if (resp.data.hits.length === 0) {
-         throw new Error()
+         throw new Error('No results for your search.')
       } 
       if (this.state.data.length === 0) {
         toast(`${resp.data.totalHits} images were found for your request.`)
@@ -53,10 +54,18 @@ export class App extends Component {
       data: [...state.data, ...resp.data.hits],
       status: 'resolved'
     }))
-    } catch {
-      this.setState({ status: 'rejected'})
+    } catch (error) {
+      if (error.name === 'AxiosError') {
+        error.message = 'There are no more photos for this request.'
+        toast(error.message)
+        this.setState({
+        status: 'rejected',})
+        return;
+      }
+      this.setState({
+        status: 'rejected',
+      error: error.message})
     }
-    
   } 
 
   loadMore = () => {
@@ -74,7 +83,7 @@ export class App extends Component {
   }
 
   render() {
-    const { data, query, status, showModal, photoIdx } = this.state;
+    const { data, query, status, showModal, photoIdx, error } = this.state;
     const { largeImageURL, tags } = data[photoIdx] ?? '';
     return (
       <ThemeProvider theme={theme}>
@@ -82,9 +91,9 @@ export class App extends Component {
         <Container display="flex" flexDirection="column" alignItems="center" padding="3">
           {data.length !== 0 &&
           (<ImageGallery data={data} query={query} toggleModal={this.toggleModal}/>)}
-          {status === 'rejected' && <Notification />}
-          {status === 'pending' && <Loader/>}
-          {data.length !== 0 && <Button loadMore={this.loadMore} />}
+          {status === 'rejected' && <Notification error={error} />}
+          {status === 'pending' && <Loader />}
+          {status === 'resolved'  && <Button loadMore={this.loadMore}/>}
         </Container>
       {showModal && <Modal toggleModal={this.toggleModal}><img src={largeImageURL} alt={tags}/></Modal>}
         <ToastContainer

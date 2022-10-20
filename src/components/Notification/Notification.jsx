@@ -1,10 +1,10 @@
 import { NotificationStyled } from "./Notifications.styled"
 
-export const Notification = () => {
+export const Notification = ({error}) => {
 
     return (
         <>
-            <NotificationStyled>No results for your search.</NotificationStyled>
+            <NotificationStyled>{error}</NotificationStyled>
         </>
     )
 }
