@@ -1,7 +1,7 @@
 import { ThemeProvider } from 'styled-components';
 import { Component } from 'react';
 import { theme } from 'theme/theme';
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer,toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Container } from './Container/Container';
@@ -9,7 +9,8 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
-
+import { Notification } from './Notification/Notification';
+import { Modal } from './Modal/Modal';
 
 import * as API from './services/api.js'
 
@@ -19,6 +20,8 @@ export class App extends Component {
     query: '',
     data: [],
     status: 'idle',
+    showModal: false,
+    photoIdx: null,
   }
   
   componentDidUpdate(_, prevState) {
@@ -26,12 +29,9 @@ export class App extends Component {
     if (query !== prevState.query || page !== prevState.page) {
       this.setState({ status: 'pending' })
       this.getData(query, page)
-        .then(() => this.setState({ status: 'resolved' }))
-        .catch(error => console.log(error));
       }
     }   
   
-
   handleQuerySubmit = query => {
       this.setState({
         page: 1,
@@ -41,10 +41,22 @@ export class App extends Component {
   }
 
   getData = async (newQuery) => {
-    const resp = await API.getData(newQuery, this.state.page);
-    this.setState(state => ({
+    try {
+      const resp = await API.getData(newQuery, this.state.page);
+      if (resp.data.hits.length === 0) {
+         throw new Error('No results for your search.')
+      } 
+      if (this.state.data.length === 0) {
+        toast(`${resp.data.totalHits} images were found for your request.`)
+      } 
+          this.setState(state => ({
       data: [...state.data, ...resp.data.hits],
+      status: 'resolved'
     }))
+    } catch {
+      this.setState({ status: 'rejected'})
+    }
+    
   } 
 
   loadMore = () => {
@@ -53,18 +65,29 @@ export class App extends Component {
     }))
   }
   
+  toggleModal = (id) => {
+    const photoIdx = this.state.data.findIndex(el => el.id === id)
+    this.setState(state => ({
+      showModal: !state.showModal,
+      photoIdx
+    }))
+  }
+
   render() {
-    const { data, query,status } = this.state;
+    const { data, query, status, showModal, photoIdx } = this.state;
     return (
-    <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
         <Searchbar onSubmit={this.handleQuerySubmit} newQuery={query}/>
         <Container display="flex" flexDirection="column" alignItems="center" padding="3">
-          <ImageGallery data={data} query={query} />
+          {data.length !== 0 &&
+          (<ImageGallery data={data} query={query} toggleModal={this.toggleModal}/>)}
+          {status === 'rejected' && <Notification />}
           {status === 'pending' && <Loader/>}
-          {data.length !== 0 && <Button loadMore={this.loadMore}/>}
+          {data.length !== 0 && <Button loadMore={this.loadMore} />}
         </Container>
+      {showModal && <Modal data={data} id={photoIdx} toggleModal={this.toggleModal}/>}
         <ToastContainer
-          position="top-center"
+          position="top-right"
           autoClose={1000}
           hideProgressBar={false}
           newestOnTop={false} 

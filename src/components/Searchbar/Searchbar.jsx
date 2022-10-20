@@ -18,7 +18,7 @@ export class Searchbar extends Component{
     e.preventDefault();
     const { query } = this.state;
      if (query.trim() === '') {
-       toast('Enter something..');
+       toast('The field must not be empty, please enter something.');
        return;
     }
     if (query.trim() === this.props.newQuery) {
