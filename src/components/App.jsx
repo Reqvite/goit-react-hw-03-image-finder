@@ -59,7 +59,7 @@ export class App extends Component {
         error.message = 'There are no more photos for this request.'
         toast(error.message)
         this.setState({
-        status: 'rejected',})
+        status: 'idle',})
         return;
       }
       this.setState({
