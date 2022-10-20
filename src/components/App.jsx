@@ -26,12 +26,40 @@ export class App extends Component {
   }
   
   componentDidUpdate(_, prevState) {
-    const { query, page} = this.state
+    const { query, page } = this.state
     if (query !== prevState.query || page !== prevState.page) {
       this.setState({ status: 'pending' })
       this.getData(query, page)
+        .then(resp => this.updateData(resp))
+        .catch(error => this.handleError(error))
+    }
+  }
+  
+  updateData = resp => {
+      if (resp.data.hits.length === 0) {
+         throw new Error('No results for your search.')
+      } 
+      if (this.state.data.length === 0) {
+        toast(`${resp.data.totalHits} images were found for your request.`)
+      } 
+          this.setState(state => ({
+      data: [...state.data, ...resp.data.hits],
+      status: 'resolved'
+      }))
+  }
+  handleError = error => {
+    if (error.name === 'AxiosError') {
+        error.message = 'There are no more photos for this request.'
+        toast(error.message)
+        this.setState({
+        status: 'idle',})
+        return;
       }
-    }   
+      this.setState({
+        status: 'rejected',
+      error: error.message})
+   }
+  
   
   handleQuerySubmit = query => {
       this.setState({
@@ -42,30 +70,7 @@ export class App extends Component {
   }
 
   getData = async (newQuery) => {
-    try {
-      const resp = await API.getData(newQuery, this.state.page);
-      if (resp.data.hits.length === 0) {
-         throw new Error('No results for your search.')
-      } 
-      if (this.state.data.length === 0) {
-        toast(`${resp.data.totalHits} images were found for your request.`)
-      } 
-          this.setState(state => ({
-      data: [...state.data, ...resp.data.hits],
-      status: 'resolved'
-    }))
-    } catch (error) {
-      if (error.name === 'AxiosError') {
-        error.message = 'There are no more photos for this request.'
-        toast(error.message)
-        this.setState({
-        status: 'idle',})
-        return;
-      }
-      this.setState({
-        status: 'rejected',
-      error: error.message})
-    }
+      return await API.getData(newQuery, this.state.page);
   } 
 
   loadMore = () => {
