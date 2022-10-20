@@ -44,7 +44,7 @@ export class App extends Component {
     try {
       const resp = await API.getData(newQuery, this.state.page);
       if (resp.data.hits.length === 0) {
-         throw new Error('No results for your search.')
+         throw new Error()
       } 
       if (this.state.data.length === 0) {
         toast(`${resp.data.totalHits} images were found for your request.`)
@@ -75,6 +75,7 @@ export class App extends Component {
 
   render() {
     const { data, query, status, showModal, photoIdx } = this.state;
+    const { largeImageURL, tags } = data[photoIdx] ?? '';
     return (
       <ThemeProvider theme={theme}>
         <Searchbar onSubmit={this.handleQuerySubmit} newQuery={query}/>
@@ -85,7 +86,7 @@ export class App extends Component {
           {status === 'pending' && <Loader/>}
           {data.length !== 0 && <Button loadMore={this.loadMore} />}
         </Container>
-      {showModal && <Modal data={data} id={photoIdx} toggleModal={this.toggleModal}/>}
+      {showModal && <Modal toggleModal={this.toggleModal}><img src={largeImageURL} alt={tags}/></Modal>}
         <ToastContainer
           position="top-right"
           autoClose={1000}

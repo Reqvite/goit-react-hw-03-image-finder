@@ -1,4 +1,6 @@
-import { Header, FormContainer, SearchButton, Input } from "./Searchbar.styled"
+import { AiOutlineSearch } from "react-icons/ai";
+
+import { Header, FormContainer, SearchButton,ButtonLabel, Input } from "./Searchbar.styled"
 
 import {  toast } from 'react-toastify';
 import { Component } from "react"
@@ -34,8 +36,9 @@ export class Searchbar extends Component{
       return (
     <Header >
     <FormContainer onSubmit={this.handleSubmit}>     
-    <SearchButton type="submit" >
-      Search
+     <SearchButton type="submit" >
+      <AiOutlineSearch size={32}/>
+    <ButtonLabel>Search</ButtonLabel>
     </SearchButton>
     <Input
       type="text"

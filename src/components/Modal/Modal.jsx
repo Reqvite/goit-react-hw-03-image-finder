@@ -19,13 +19,16 @@ export class Modal extends Component {
     }
   }
 
-
+  handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      this.props.toggleModal()
+    }
+  }
   render() {
-    const { data, id } = this.props
       return createPortal(
-        <Overlay>
+        <Overlay onClick={this.handleBackdropClick}>
   <ModalStyled >
-    <img src={data[id].largeImageURL} alt={data[id].tags} />
+{this.props.children}
   </ModalStyled>
         </Overlay>,
         modalRoot
