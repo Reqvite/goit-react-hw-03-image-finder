@@ -36,37 +36,37 @@ export class App extends Component {
   }
   
   updateData = resp => {
-      if (resp.data.hits.length === 0) {
-         throw new Error('No results for your search.')
-      } 
+      if (resp.data.hits.length === 0 ) {
+        throw new Error('No results for your search.');
+    };
+        if ((this.state.data.length + 12) >= resp.data.totalHits) {
+       this.setState({
+        status: 'idle',
+       });
+      toast(`A total of ${resp.data.totalHits} results were shown, there are no more photos for this query.`);
+      return;
+    }
       if (this.state.data.length === 0) {
-        toast(`${resp.data.totalHits} images were found for your request.`)
-      } 
-          this.setState(state => ({
+        toast(`${resp.data.totalHits} images were found for your request.`);
+    };
+    this.setState(state => ({
       data: [...state.data, ...resp.data.hits],
       status: 'resolved'
-      }))
+    }));
   }
   handleError = error => {
-    if (error.name === 'AxiosError') {
-        error.message = 'There are no more photos for this request.'
-        toast(error.message)
-        this.setState({
-        status: 'idle',})
-        return;
-      }
-      this.setState({
-        status: 'rejected',
-      error: error.message})
+    this.setState({
+      status: 'rejected',
+      error: error.message
+    });
    }
   
-  
   handleQuerySubmit = query => {
-      this.setState({
-        page: 1,
-        query,
-        data: []
-      }) 
+    this.setState({
+      page: 1,
+      query,
+      data: []
+    });
   }
 
   getData = async (newQuery) => {
@@ -76,15 +76,15 @@ export class App extends Component {
   loadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1
-    }))
+    }));
   }
   
   toggleModal = (id) => {
-    const photoIdx = this.state.data.findIndex(el => el.id === id)
+    const photoIdx = this.state.data.findIndex(el => el.id === id);
     this.setState(state => ({
       showModal: !state.showModal,
       photoIdx
-    }))
+    }));
   }
 
   render() {
@@ -103,7 +103,7 @@ export class App extends Component {
       {showModal && <Modal toggleModal={this.toggleModal}><img src={largeImageURL} alt={tags}/></Modal>}
         <ToastContainer
           position="top-right"
-          autoClose={1000}
+          autoClose={1500}
           hideProgressBar={false}
           newestOnTop={false} 
           closeOnClick
