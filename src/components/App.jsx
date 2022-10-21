@@ -36,21 +36,24 @@ export class App extends Component {
   }
   
   updateData = resp => {
-      if (resp.data.hits.length === 0 ) {
+    const dataLength = this.state.data.length;
+    const {totalHits, hits} = resp.data
+      if (hits.length === 0 ) {
         throw new Error('No results for your search.');
     };
-        if ((this.state.data.length + 12) >= resp.data.totalHits) {
-       this.setState({
-        status: 'idle',
-       });
-      toast(`A total of ${resp.data.totalHits} results were shown, there are no more photos for this query.`);
+        if ((dataLength + 12) >= totalHits) {
+        this.setState(state => ({
+      data: [...state.data, ...hits],
+      status: 'idle'
+    }));
+       toast(`A total of ${totalHits} results were shown, there are no more photos for this query.`);   
       return;
     }
-      if (this.state.data.length === 0) {
-        toast(`${resp.data.totalHits} images were found for your request.`);
+      if (dataLength === 0) {
+        toast(`${totalHits} images were found for your request.`);
     };
     this.setState(state => ({
-      data: [...state.data, ...resp.data.hits],
+      data: [...state.data, ...hits],
       status: 'resolved'
     }));
   }
